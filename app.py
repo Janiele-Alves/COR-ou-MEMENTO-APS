@@ -1,6 +1,5 @@
 from flask import Flask, render_template
-
-app = Flask(__name__, template_folder="template/index.html")
+app = Flask(__name__, template_folder="template")
 
 class Memento:
     def __init__(self, validadores):
@@ -8,7 +7,6 @@ class Memento:
 
     def get_state(self):
         return self._state
-
 
 class ValidadorInscricao:
     def __init__(self):
@@ -28,7 +26,6 @@ class ValidadorInscricao:
         if self._memento:
             self.__dict__ = self._memento.get_state().__dict__
 
-
 class ValidadorIdade(ValidadorInscricao):
     def validar(self, aluno):
         if aluno.idade < 18:
@@ -36,7 +33,6 @@ class ValidadorIdade(ValidadorInscricao):
         if self.proximo:
             return self.proximo.validar(aluno)
         return True
-
 
 class ValidadorPagamento(ValidadorInscricao):
     def validar(self, aluno):
@@ -46,7 +42,6 @@ class ValidadorPagamento(ValidadorInscricao):
             return self.proximo.validar(aluno)
         return True
 
-
 class ValidadorAluno(ValidadorInscricao):
     def validar(self, aluno):
         if aluno.idade >= 18 and aluno.pagamento_em_dia:
@@ -54,7 +49,6 @@ class ValidadorAluno(ValidadorInscricao):
         if self.proximo:
             return self.proximo.validar(aluno)
         return True
-
 
 class Aluno:
     def __init__(self, nome, idade, pagamento_em_dia):
@@ -64,6 +58,8 @@ class Aluno:
 
 @app.route('/')
 def index():
+    aluno1 = Aluno("Maria", 14, True)
+    aluno2 = Aluno("Janiele", 30, False)
     aluno3 = Aluno("Janiel", 30, True)
 
     validador_idade = ValidadorIdade()
@@ -78,12 +74,12 @@ def index():
 
     validador_idade.restaurar_estado()
     validador_pagamento.restaurar_estado()
-    validador_aluno.restaurar_estado()
 
-    resultado_validacao = "O aluno está apto para a academia." if validador_aluno.validar(aluno3) else "O aluno não está apto para a academia."
 
-    return render_template('index.html', resultado_validacao=resultado_validacao)
-
+    resultado_validacao3 = "O aluno está apto para a academia." if validador_aluno.validar(aluno3) else "O aluno não está apto para a academia."
+    resultado_validacao1 = "O aluno está apto para a academia." if validador_idade.validar(aluno1) else "O aluno é menor de idade."
+    resultado_validacao2 = "O aluno está apto para a academia." if validador_pagamento.validar(aluno2) else "O aluno está com a mensalidade atrasada."
+    return render_template('index.html', resultado_validacao1=resultado_validacao1, resultado_validacao2=resultado_validacao2, resultado_validacao3=resultado_validacao3)
 
 if __name__ == '__main__':
     app.run(debug=True)
